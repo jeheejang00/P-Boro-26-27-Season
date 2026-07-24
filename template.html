@@ -711,9 +711,10 @@ function statBlocks(p){
   const kpi = (label,v,hl=false)=>`<div class="kpi${hl?' hl':''}"><b class="num">${fmt(v)}</b><span>${label}</span></div>`;
 
   const lostTiles = [kpi('Ball Received',p.received), kpi('Ball Lost',p.lost),
-    kpi('Lost Final 1/3',p.lostThirds[2]), kpi('Lost Middle 1/3',p.lostThirds[1]), kpi('Lost Own 1/3',p.lostThirds[0])].join('');
+    kpi('Lost Final 1/3',p.lostThirds[2]), kpi('Lost Middle 1/3',p.lostThirds[1]), kpi('Lost Own 1/3',p.lostThirds[0])]
+    .concat(isGK? [kpi('Critical +', p.critical, !!p.critical)] : []).join('');
   const shotTiles = [kpi('Goal',p.goals,!!p.goals), kpi('Assist',p.assists,!!p.assists),
-    kpi('On Target',p.shots[1]), kpi('Off Target',p.shots[2]), kpi('Blocked',p.shots[3])].join('');
+    kpi('On Target',p.shots[1]), kpi('Off Target',p.shots[2]), kpi('Blocked',p.shots[3]), kpi('Critical +',p.critical,!!p.critical)].join('');
   const statsHTML = isGK
     ? `<div class="kpi-tiles">${lostTiles}</div>`
     : `<div class="kpi-tiles">${shotTiles}</div><div class="kpi-tiles" style="margin-top:8px">${lostTiles}</div>`;
