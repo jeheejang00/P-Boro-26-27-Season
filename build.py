@@ -25,6 +25,7 @@ analyst's manual dashboard numbers), so only counts are reported for those.
 """
 import json, re, sys
 from pathlib import Path
+from datetime import datetime
 import pandas as pd
 from openpyxl import load_workbook
 
@@ -76,16 +77,62 @@ def spans(df, row, half=None):
     if half: sub = sub[sub["Half"]==half]
     return union([[r["Start time"], r["Start time"]+r["Duration"]] for _,r in sub.iterrows()])
 
-def parse_meta(df, fname):
+def load_match_meta(path):
+    """Read DATE/Opposition/Venue/Competition from the Dashboard sheet's
+    per-half table — more reliable than parsing the Timeline string, whose
+    format isn't consistent across exported files. Searches for the header
+    cells by name rather than a fixed column, so layout shifts don't break it."""
+    try:
+        wb = load_workbook(path, data_only=True)
+    except Exception:
+        return {}
+    if "Dashboard" not in wb.sheetnames:
+        return {}
+    ws = wb["Dashboard"]
+    for r in range(1, min(ws.max_row, 20)+1):
+        headers = {}
+        for c in range(1, ws.max_column+1):
+            v = ws.cell(r, c).value
+            if v in ("DATE","Opposition","Venue","Competition"):
+                headers[v] = c
+        if {"Opposition","Venue"} <= headers.keys():
+            for rr in range(r+1, r+6):
+                opp = ws.cell(rr, headers["Opposition"]).value
+                venue = ws.cell(rr, headers["Venue"]).value
+                if opp and venue:
+                    date = ws.cell(rr, headers["DATE"]).value if "DATE" in headers else None
+                    comp = ws.cell(rr, headers["Competition"]).value if "Competition" in headers else None
+                    return {"opponent": str(opp).strip(), "venue": str(venue).strip().upper()[:1],
+                            "date": date, "competition": comp}
+    return {}
+
+def parse_meta(path, df, fname):
+    extra = load_match_meta(path)
+    # date fallback: parse from the Timeline string (Dashboard's DATE cell is
+    # sometimes left blank even when Opposition/Venue are filled in)
     tl = str(df["Timeline"].dropna().iloc[0])
-    m = re.search(r"vs\s+(.+?)\s*\((H|A)\)\s*([\d.]+)", tl)
-    opp, venue, d = (m.group(1), m.group(2), m.group(3)) if m else (tl, "?", "")
-    date_iso = ""
-    dm = re.match(r"(\d+)\.(\d+)\.(\d+)", d)
+    tl_date_label, tl_date_iso = "", ""
+    dm = re.search(r"([\d]{1,2})\.([\d]{1,2})\.([\d]{2,4})", tl)
     if dm:
         dd, mm, yy = dm.groups()
-        date_iso = f"20{yy}-{int(mm):02d}-{int(dd):02d}"
-    return {"opponent": opp, "venue": venue, "dateLabel": d, "date": date_iso, "file": fname}
+        yy = yy if len(yy)==4 else f"20{yy}"
+        tl_date_label = f"{int(dd)}.{int(mm)}.{yy[-2:]}"
+        tl_date_iso = f"{yy}-{int(mm):02d}-{int(dd):02d}"
+
+    if extra.get("opponent") and extra.get("venue"):
+        d = extra.get("date")
+        if isinstance(d, datetime):
+            date_iso = d.strftime("%Y-%m-%d")
+            date_label = f"{d.day}.{d.month}.{d.strftime('%y')}"
+        else:
+            date_iso, date_label = tl_date_iso, tl_date_label
+        return {"opponent": extra["opponent"], "venue": extra["venue"],
+                "dateLabel": date_label, "date": date_iso, "file": fname}
+    # full fallback: parse everything from the Timeline string (older files
+    # without the Dashboard Opposition/Venue table)
+    m = re.search(r"vs\s+(.+?)\s*\((H|A)\)\s*([\d.]+)", tl)
+    opp, venue = (m.group(1), m.group(2)) if m else (tl, "?")
+    return {"opponent": opp, "venue": venue, "dateLabel": tl_date_label, "date": tl_date_iso, "file": fname}
 
 def chance_block(series):
     s = series.fillna("")
@@ -207,7 +254,7 @@ def load_positions_and_minutes(path):
 
 def build_match(path):
     df = pd.read_excel(path, sheet_name="Raw data")
-    meta = parse_meta(df, path.name)
+    meta = parse_meta(path, df, path.name)
 
     periods = {
         "full": team_period(df),
@@ -295,7 +342,7 @@ def build_match(path):
     return {"meta": meta, "team": team, "players": players}
 
 def main():
-    files = sorted(MATCH_DIR.glob("*.xlsx"))
+    files = sorted(f for f in MATCH_DIR.glob("*.xlsx") if not f.name.startswith("~$"))
     if not files:
         sys.exit(f"No .xlsx files found in {MATCH_DIR}/")
     matches = []
