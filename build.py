@@ -106,33 +106,43 @@ def load_match_meta(path):
                             "date": date, "competition": comp}
     return {}
 
+def clean_opponent(raw):
+    """Dashboard's Opposition cell is sometimes filled with the whole match
+    title (e.g. '15:16s vs Wolves 18.07.26') instead of just the team name —
+    pull out just the opponent name in that case."""
+    s = str(raw).strip()
+    m = re.search(r"vs\.?\s+(.+?)(?:\s+\d{1,2}[\.\/]\d{1,2}[\.\/]\d{2,4})?\s*$", s, re.IGNORECASE)
+    return m.group(1).strip() if m else s
+
 def parse_meta(path, df, fname):
     extra = load_match_meta(path)
-    # date fallback: parse from the Timeline string (Dashboard's DATE cell is
-    # sometimes left blank even when Opposition/Venue are filled in)
-    tl = str(df["Timeline"].dropna().iloc[0])
-    tl_date_label, tl_date_iso = "", ""
-    dm = re.search(r"([\d]{1,2})\.([\d]{1,2})\.([\d]{2,4})", tl)
-    if dm:
-        dd, mm, yy = dm.groups()
-        yy = yy if len(yy)==4 else f"20{yy}"
-        tl_date_label = f"{int(dd)}.{int(mm)}.{yy[-2:]}"
-        tl_date_iso = f"{yy}-{int(mm):02d}-{int(dd):02d}"
+    # date: prefer the filename's leading YYMMDD (the analyst's consistent
+    # naming convention across weeks) over Timeline text or Dashboard's DATE
+    # cell, both of which have been inconsistently formatted/blank.
+    date_iso, date_label = "", ""
+    fm = re.match(r"(\d{2})(\d{2})(\d{2})", fname)
+    if fm:
+        yy, mm, dd = fm.groups()
+        date_iso = f"20{yy}-{mm}-{dd}"
+        date_label = f"{int(dd)}.{int(mm)}.{yy}"
+    else:
+        tl = str(df["Timeline"].dropna().iloc[0])
+        dm = re.search(r"([\d]{1,2})\.([\d]{1,2})\.([\d]{2,4})", tl)
+        if dm:
+            dd, mm, yy = dm.groups()
+            yy = yy if len(yy)==4 else f"20{yy}"
+            date_label = f"{int(dd)}.{int(mm)}.{yy[-2:]}"
+            date_iso = f"{yy}-{int(mm):02d}-{int(dd):02d}"
 
     if extra.get("opponent") and extra.get("venue"):
-        d = extra.get("date")
-        if isinstance(d, datetime):
-            date_iso = d.strftime("%Y-%m-%d")
-            date_label = f"{d.day}.{d.month}.{d.strftime('%y')}"
-        else:
-            date_iso, date_label = tl_date_iso, tl_date_label
-        return {"opponent": extra["opponent"], "venue": extra["venue"],
+        return {"opponent": clean_opponent(extra["opponent"]), "venue": extra["venue"],
                 "dateLabel": date_label, "date": date_iso, "file": fname}
-    # full fallback: parse everything from the Timeline string (older files
-    # without the Dashboard Opposition/Venue table)
+    # full fallback: parse opponent/venue from the Timeline string (older
+    # files without the Dashboard Opposition/Venue table)
+    tl = str(df["Timeline"].dropna().iloc[0])
     m = re.search(r"vs\s+(.+?)\s*\((H|A)\)\s*([\d.]+)", tl)
     opp, venue = (m.group(1), m.group(2)) if m else (tl, "?")
-    return {"opponent": opp, "venue": venue, "dateLabel": tl_date_label, "date": tl_date_iso, "file": fname}
+    return {"opponent": opp, "venue": venue, "dateLabel": date_label, "date": date_iso, "file": fname}
 
 def chance_block(series):
     s = series.fillna("")
