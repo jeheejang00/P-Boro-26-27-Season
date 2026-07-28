@@ -633,37 +633,41 @@ function scopePlayers(){
 }
 function teamPassTitle(){
   const P = Object.values(scopePlayers());
-  const t = P.reduce((a,p)=>a+p.passes.Total[0],0), s = P.reduce((a,p)=>a+p.passes.Total[1],0);
-  return `<b class="num">${s}/${t} <span class="pct" style="font-size:15px">${pct(s,t)??0}%</span></b>`;
+  const div = sel===-1? M.length : 1;
+  const t = P.reduce((a,p)=>a+p.passes.Total[0],0)/div, s = P.reduce((a,p)=>a+p.passes.Total[1],0)/div;
+  return `<b class="num">${fmt(s)}/${fmt(t)} <span class="pct" style="font-size:15px">${pct(s,t)??0}%</span></b>`;
 }
 function teamPassing(){
   const P = Object.values(scopePlayers());
-  const S = k => [P.reduce((a,p)=>a+p.passes[k][0],0), P.reduce((a,p)=>a+p.passes[k][1],0)];
+  const div = sel===-1? M.length : 1;
+  const S = k => [P.reduce((a,p)=>a+p.passes[k][0],0)/div, P.reduce((a,p)=>a+p.passes[k][1],0)/div];
   const rows = [["Forward","Forward"],["Lateral","Lateral"],["Backward","Backward"],["Long","Long"],["Balls in behind","In Behind"],["Crosses","Cross"]]
     .map(([lab,k])=>{const [t,s]=S(k);return {lab,t,s}}).filter(r=>r.t>0);
-  const kp = P.reduce((a,p)=>a+p.keyPass,0);
+  const kp = P.reduce((a,p)=>a+p.keyPass,0)/div;
   return rows.map(r=>`
-    <div class="stat-line"><span>${r.lab}</span><span><b class="num">${r.s}/${r.t}</b><span class="pct num">${pct(r.s,r.t)}%</span></span></div>
+    <div class="stat-line"><span>${r.lab}</span><span><b class="num">${fmt(r.s)}/${fmt(r.t)}</b><span class="pct num">${pct(r.s,r.t)}%</span></span></div>
     <div class="bar"><i style="width:${pct(r.s,r.t)}%"></i></div>`).join('') +
-    `<div class="stat-line"><span>Key Pass</span><b class="num">${kp}</b></div>
+    `<div class="stat-line"><span>Key Pass</span><b class="num">${fmt(kp)}</b></div>
      <div class="bar"><i style="width:100%"></i></div>`;
 }
 function teamDuels(){
   const P = Object.values(scopePlayers());
-  const S = k => [P.reduce((a,p)=>a+p[k][0],0), P.reduce((a,p)=>a+p[k][1],0)];
+  const div = sel===-1? M.length : 1;
+  const S = k => [P.reduce((a,p)=>a+p[k][0],0)/div, P.reduce((a,p)=>a+p[k][1],0)/div];
   const rows = [["Offensive duels","offDuel"],["1v1 attack","a1v1"],["1v1 defence","d1v1"],["Defensive duels","defDuel"],["Aerial duels","aerial"],["Tackles","tackles"],["2nd balls","second"]]
     .map(([lab,k])=>{const [t,s]=S(k);return {lab,t,s}}).filter(r=>r.t>0);
   return rows.map(r=>`
-    <div class="stat-line"><span>${r.lab}</span><span><b class="num">${r.s}/${r.t}</b><span class="pct num">${pct(r.s,r.t)}%</span></span></div>
+    <div class="stat-line"><span>${r.lab}</span><span><b class="num">${fmt(r.s)}/${fmt(r.t)}</b><span class="pct num">${pct(r.s,r.t)}%</span></span></div>
     <div class="bar"><i style="width:${pct(r.s,r.t)}%"></i></div>`).join('');
 }
 function teamDefActions(){
   const P = Object.values(scopePlayers());
-  const N = k => P.reduce((a,p)=>a+p[k],0);
+  const div = sel===-1? M.length : 1;
+  const N = k => P.reduce((a,p)=>a+p[k],0)/div;
   const rows = [["Interceptions","interception"],["Recoveries","recovery"],["Turnovers won","turnoverWon"],
     ["Clearances","clearance"],["Blocked shots","blockedShots"],["Fouls","fouls"],["Fouls won","wonFouls"]]
     .filter(([,k])=> k!=="blockedShots"); // not tracked per-player; omit if absent
-  return rows.map(([l,k])=>`<div class="plain-row"><span>${l}</span><b class="num">${N(k)}</b></div>`).join('');
+  return rows.map(([l,k])=>`<div class="plain-row"><span>${l}</span><b class="num">${fmt(N(k))}</b></div>`).join('');
 }
 
 /* ---------- PLAYER PAGE ---------- */
