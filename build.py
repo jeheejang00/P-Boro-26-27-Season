@@ -167,12 +167,17 @@ def trans_block(d, row, mirror=False):
     return {"total": int(len(t)), "final": fin, "middle": mid, "own": own,
             "counter": counter, "counterpress": cpress}
 
-def setplay_counts(d, row, pfx):
+def setplay_counts(d, row, pfx, mirror=False):
     s = d[d["Row"]==row]
     det = s["Team-Set Play Details"].fillna("")
     c = lambda k: int(det.str.contains(k, regex=False).sum())
     throw = s[det == f"{pfx} Throw In"]
-    throwFinal3 = int(throw["Team-Transition Details"].fillna("").str.contains("Final 1/3", regex=False).sum())
+    # zone tags (Final/Middle/Own 1/3) are always in P'Boro's fixed frame,
+    # regardless of which team's row they're attached to — so an opponent
+    # throw-in advancing into OUR defensive third is tagged 'Own 1/3', not
+    # 'Final 1/3'. Mirror for the opponent side accordingly.
+    zone = "Own 1/3" if mirror else "Final 1/3"
+    throwFinal3 = int(throw["Team-Transition Details"].fillna("").str.contains(zone, regex=False).sum())
     return {"corner": c(f"{pfx} Corner"), "throwIn": c(f"{pfx} Throw In"),
             "freeKick": c(f"{pfx} Free Kick"), "goalKick": c(f"{pfx} Goal Kick"),
             "throwFinal3": throwFinal3}
@@ -211,7 +216,7 @@ def team_period(d):
         "trans": trans_block(d,"Transition to Attack"),
         "oppTrans": trans_block(d,"Transition to Defense", mirror=True),
         "setPlay": setplay_counts(d,"P'Boro Set Plays","P'Boro"),
-        "oppSetPlay": setplay_counts(d,"Opp Set Plays","Opp"),
+        "oppSetPlay": setplay_counts(d,"Opp Set Plays","Opp", mirror=True),
     }
 
 def shots_list(df):
