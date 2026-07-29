@@ -170,34 +170,40 @@ main{max-width:1180px;margin:0 auto;padding:26px 20px 80px}
 
 /* radar comparison */
 .radar-wrap{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px 24px}
-.radar-players{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px}
-.rp-btn{display:flex;align-items:center;gap:9px;background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:6px 12px 6px 6px;cursor:pointer;transition:border-color .15s,background .15s}
+.radar-layout{display:grid;grid-template-columns:236px 1fr 236px;gap:20px;align-items:start}
+.radar-side{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:14px}
+.rs-h{font-family:var(--disp);font-weight:600;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-bottom:10px;display:flex;align-items:baseline;gap:6px}
+.rs-h .rs-hint{font-family:var(--body);text-transform:none;letter-spacing:0;font-size:11px;color:var(--mut);opacity:.75}
+
+.radar-players{display:flex;flex-direction:column;gap:6px;max-height:560px;overflow:auto}
+.rp-btn{display:flex;align-items:center;gap:9px;width:100%;background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:7px 10px 7px 7px;cursor:pointer;transition:border-color .15s,background .15s;text-align:left}
 .rp-btn:hover{background:#132444}
 .rp-btn.on{background:#132a52}
-.rp-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-weight:700;font-size:12px;flex:none}
-.rp-meta{display:flex;flex-direction:column;line-height:1.15;text-align:left}
-.rp-name{font-size:13.5px;font-weight:600;color:var(--ink)}
-.rp-sub{font-size:11px;color:var(--mut);letter-spacing:.03em}
-.rp-hint{color:var(--mut);font-size:12px;margin:2px 0 16px}
-.radar-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.rp-av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-weight:700;font-size:12px;flex:none}
+.rp-meta{display:flex;flex-direction:column;line-height:1.2;min-width:0;flex:1}
+.rp-name{font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rp-sub{font-size:10.5px;color:var(--mut);letter-spacing:.03em;display:flex;align-items:center;gap:5px}
+.rp-pos{font-family:var(--disp);font-weight:700;font-size:9.5px;letter-spacing:.06em;padding:0 5px;border-radius:4px;line-height:1.5}
+.rp-dot{width:10px;height:10px;border-radius:50%;flex:none;margin-left:2px}
+
+.radar-center{display:flex;flex-direction:column;gap:16px}
 .radar-card{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:16px 14px 14px}
 .radar-card .rc-title{font-family:var(--disp);font-weight:600;font-size:13.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--mut);text-align:center;margin-bottom:6px}
 .radar-card svg{display:block;width:100%;height:auto}
 .radar-empty{display:flex;align-items:center;justify-content:center;min-height:300px;color:var(--mut);font-size:14px;text-align:center;padding:0 20px}
-.radar-legend{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-top:14px}
+.radar-legend{display:flex;flex-wrap:wrap;gap:14px;justify-content:center}
 .radar-legend .lg-item{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--ink)}
 .radar-legend .lg-swatch{width:12px;height:12px;border-radius:3px;flex:none}
-.axis-toggle{margin-top:14px}
-.axis-toggle summary{cursor:pointer;color:var(--mut);font-size:12.5px;letter-spacing:.05em;list-style:none;user-select:none}
-.axis-toggle summary::-webkit-details-marker{display:none}
-.axis-toggle summary::before{content:'▸ ';font-size:10px}
-.axis-toggle[open] summary::before{content:'▾ '}
-.axis-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:12px}
-.axis-col .ac-h{font-family:var(--disp);font-weight:600;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-bottom:8px}
+
 .axis-chips{display:flex;flex-wrap:wrap;gap:6px}
 .ax-chip{font-size:12px;background:var(--panel);border:1px solid var(--line);color:var(--mut);padding:5px 10px;border-radius:8px;cursor:pointer;transition:all .12s}
 .ax-chip:hover{border-color:var(--blue-deep)}
 .ax-chip.on{background:var(--blue-deep);border-color:var(--blue-deep);color:#fff}
+
+@media (max-width:960px){
+  .radar-layout{grid-template-columns:1fr}
+  .radar-players{max-height:260px}
+}
 footer{border-top:1px solid var(--line);color:var(--mut);text-align:center;padding:22px;font-size:12.5px;letter-spacing:.05em}
 
 /* period toggle (reuses .mode look) */
@@ -262,37 +268,6 @@ footer{border-top:1px solid var(--line);color:var(--mut);text-align:center;paddi
   </div>
   <div class="page" id="page-compare">
     <div class="section" style="margin-top:0">
-      <div class="sec-title">Radar Comparison <em id="radarScope"></em></div>
-      <div class="radar-wrap">
-        <div class="rp-hint">Pick up to 5 players to overlay · all values are per-game averages</div>
-        <div class="radar-players" id="radarPlayers"></div>
-        <div class="radar-grid">
-          <div class="radar-card">
-            <div class="rc-title">Per-Game Averages</div>
-            <div id="radarCount"></div>
-          </div>
-          <div class="radar-card">
-            <div class="rc-title">Percentages</div>
-            <div id="radarPct"></div>
-          </div>
-        </div>
-        <div class="radar-legend" id="radarLegend"></div>
-        <details class="axis-toggle">
-          <summary>Customise axes</summary>
-          <div class="axis-cols">
-            <div class="axis-col">
-              <div class="ac-h">Per-Game Average axes</div>
-              <div class="axis-chips" id="axisCount"></div>
-            </div>
-            <div class="axis-col">
-              <div class="ac-h">Percentage axes</div>
-              <div class="axis-chips" id="axisPct"></div>
-            </div>
-          </div>
-        </details>
-      </div>
-    </div>
-    <div class="section">
       <div class="sec-title">Metric Ranking</div>
       <div class="cbar-wrap">
         <div class="controls">
@@ -304,6 +279,38 @@ footer{border-top:1px solid var(--line);color:var(--mut);text-align:center;paddi
           <div class="scope-note" id="scopeNote"></div>
         </div>
         <div id="cbars"></div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="sec-title">Radar Comparison <em id="radarScope"></em></div>
+      <div class="radar-wrap">
+        <div class="radar-layout">
+
+          <div class="radar-side radar-side-players">
+            <div class="rs-h">Players <span class="rs-hint">(up to 5)</span></div>
+            <div class="radar-players" id="radarPlayers"></div>
+          </div>
+
+          <div class="radar-center">
+            <div class="radar-card">
+              <div class="rc-title">Per-Game Averages</div>
+              <div id="radarCount"></div>
+            </div>
+            <div class="radar-card">
+              <div class="rc-title">Percentages</div>
+              <div id="radarPct"></div>
+            </div>
+            <div class="radar-legend" id="radarLegend"></div>
+          </div>
+
+          <div class="radar-side radar-side-axes">
+            <div class="rs-h">Per-Game Indicators</div>
+            <div class="axis-chips" id="axisCount"></div>
+            <div class="rs-h" style="margin-top:18px">Percentage Indicators</div>
+            <div class="axis-chips" id="axisPct"></div>
+          </div>
+
+        </div>
       </div>
     </div>
   </div>
@@ -954,6 +961,9 @@ const RADAR_PCT = [
 const RADAR_COUNT_DEFAULT = ["Goals","Shots","Key Passes","Total Passes","Passes Rec.","Tackles Won","Recoveries","Aerial Duels"];
 const RADAR_PCT_DEFAULT   = ["Pass %","Fwd Pass %","On Target %","Tackle %","Aerial %"];
 const RADAR_COLORS = ['#3d8bff','#39d98a','#ffb020','#c07cff','#ff4d5e'];
+/* same position palette used on the Player Stats page (.pos-fwd/.pos-mid/.pos-def/.pos-gk) */
+const POS_COLORS = {FWD:'#ff5470', MID:'#39d98a', DEF:'#3d8bff', GK:'#ffd23f'};
+const POS_ABBR   = {FWD:'FWD', MID:'MF', DEF:'DEF', GK:'GK'};
 
 let radarSel = [];   // selected player names (max 5)
 let axCount = RADAR_COUNT_DEFAULT.slice();
@@ -1028,12 +1038,17 @@ function renderRadarPlayers(){
   Object.keys(data).sort((a,b)=>a.localeCompare(b)).forEach(name=>{
     const ci = radarSel.indexOf(name);
     const on = ci>=0;
-    const color = on ? RADAR_COLORS[ci%RADAR_COLORS.length] : null;
+    const overlay = on ? RADAR_COLORS[ci%RADAR_COLORS.length] : null;
     const apps = radarApps(name), pos = radarPos(name);
-    const b = el(`<button class="rp-btn ${on?'on':''}" style="${color?`border-color:${color}`:''}">
-      <span class="rp-av" style="background:${(color||'#33456e')}22;color:${color||'var(--mut)'}">${initials(name)}</span>
-      <span class="rp-meta"><span class="rp-name">${name}</span>
-      <span class="rp-sub">${[pos, sel===-1?`${apps}g`:''].filter(Boolean).join(' · ')}</span></span>
+    const posColor = POS_COLORS[pos] || 'var(--mut)';
+    const posBadge = pos ? `<span class="rp-pos" style="background:${POS_COLORS[pos]?POS_COLORS[pos]+'26':'rgba(130,150,187,.15)'};color:${posColor}">${POS_ABBR[pos]||pos}</span>` : '';
+    const b = el(`<button class="rp-btn ${on?'on':''}" style="${overlay?`border-color:${overlay}`:''}">
+      <span class="rp-av" style="background:${posColor}22;color:${posColor}">${initials(name)}</span>
+      <span class="rp-meta">
+        <span class="rp-name">${name}</span>
+        <span class="rp-sub">${posBadge}${sel===-1?`${apps}g`:''}</span>
+      </span>
+      ${overlay?`<span class="rp-dot" style="background:${overlay}"></span>`:''}
     </button>`);
     b.addEventListener('click', ()=>{
       const i = radarSel.indexOf(name);
