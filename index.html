@@ -816,30 +816,32 @@ function renderPlayerCard(){
 /* ---------- COMPARISON PAGE ---------- */
 const COUNT_METRICS = [
   ["Goals", p=>p.goals],["Assists", p=>p.assists],["Shots", p=>p.shots[0]],["Shots on target", p=>p.shots[1]],
-  ["Total passes", p=>p.passes.Total[0]],["Passes completed", p=>p.passes.Total[1]],
-  ["Forward passes", p=>p.passes.Forward[0]],["Passes received", p=>p.received],
+  ["Total passes", p=>p.passes.Total[0]],
+  ["Forward passes", p=>p.passes.Forward[0]],["Long pass", p=>p.passes.Long[0]],["Passes received", p=>p.received],
   ["Key Pass", p=>p.keyPass],["Balls in behind", p=>p.passes["In Behind"][0]],
   ["Crosses", p=>p.passes.Cross[0]],["Touches in the box", p=>p.touchBox],
   ["1v1 attacks", p=>p.a1v1[0]],["Accelerations", p=>p.accel],["Runs in behind", p=>p.runsBehind],
-  ["Defensive duels", p=>p.defDuel[0]],["Interceptions", p=>p.interception],
+  ["Move into pocket", p=>p.pocket],["Wide area", p=>p.wide],["Back to goal", p=>p.backToGoal],
+  ["Defensive duels", p=>p.defDuel[0]],["Aerial duels", p=>p.aerial[0]],["Interceptions", p=>p.interception],
   ["Recoveries", p=>p.recovery],["Turnovers won", p=>p.turnoverWon],
-  ["2nd balls won", p=>p.second[1]],["Ball lost", p=>p.lost],["Fouls won", p=>p.wonFouls],
+  ["2nd balls", p=>p.second[1]],["Ball lost", p=>p.lost],["Fouls won", p=>p.wonFouls],
 ];
 const PCT_METRICS = [
   ["Pass accuracy %", p=>p.passes.Total],
   ["Forward pass %", p=>p.passes.Forward],
-  ["Lateral pass %", p=>p.passes.Lateral],
+  ["Long pass %", p=>p.passes.Long],
   ["Balls in behind %", p=>p.passes["In Behind"]],
   ["Cross accuracy %", p=>p.passes.Cross],
+  ["On Target %", p=>[p.shots[0], p.shots[1]]],
   ["1v1 attack success %", p=>p.a1v1],
   ["Offensive duel %", p=>p.offDuel],
   ["Defensive duel %", p=>p.defDuel],
+  ["1v1 defence %", p=>p.d1v1],
   ["Tackle success %", p=>p.tackles],
   ["2nd ball %", p=>p.second],
   ["Aerial duel %", p=>p.aerial],
   ["All duels won %", p=>{const ks=['defDuel','d1v1','aerial','tackles','second','offDuel','a1v1'];
       return [ks.reduce((a,k)=>a+p[k][0],0), ks.reduce((a,k)=>a+p[k][1],0)];}],
-  ["Ball retention %", p=>[p.received, Math.max(p.received-p.lost,0)]],
 ];
 function initCompare(){
   const ms = document.getElementById('metricSel');
