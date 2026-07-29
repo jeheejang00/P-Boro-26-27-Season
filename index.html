@@ -857,24 +857,19 @@ function initCompare(){
   }));
 }
 function renderCompare(){
-  const totP = scopePlayers();
-  const avgP = sel===-1 ? Object.fromEntries(Object.entries(AGG).map(([n,a])=>[n,a.avg])) : totP;
+  const P = scopePlayers();
   const note = document.getElementById('scopeNote');
-  note.textContent = sel===-1
-    ? (cmpMode==='count'? `All matches — per match average across ${M.length} match${M.length>1?'es':''}` : `All matches — totals across ${M.length} match${M.length>1?'es':''}`)
-    : matchLabel(M[sel]);
+  note.textContent = sel===-1? `All matches — totals across ${M.length} match${M.length>1?'es':''}` : matchLabel(M[sel]);
   const box = document.getElementById('cbars'); box.innerHTML='';
   if(cmpMode==='count'){
-    const P = avgP;
     const [,f] = COUNT_METRICS[cmpMetric];
-    const rows = Object.entries(P).map(([n,p])=>[n, f(p)]).sort((a,b)=>b[1]-a[1]);
+    const rows = Object.entries(P).map(([n,p])=>[n, f(p), sel===-1? AGG[n].apps : 1]).sort((a,b)=>b[1]-a[1]);
     const max = Math.max(...rows.map(r=>r[1]),0.001);
-    rows.forEach(([n,v],i)=> box.appendChild(el(`<div class="cbar ${i===0&&v>0?'top':''}">
+    rows.forEach(([n,v,apps],i)=> box.appendChild(el(`<div class="cbar ${i===0&&v>0?'top':''}">
       <span class="cname">${n}</span>
       <div class="track"><i style="width:${v/max*100}%"></i></div>
-      <span class="cval num">${fmt(v)}</span></div>`)));
+      <span class="cval num">${fmt(v)}${sel===-1?`<small>${apps} app${apps>1?'s':''}</small>`:''}</span></div>`)));
   } else {
-    const P = totP;
     const [,f] = PCT_METRICS[cmpMetric];
     const rows = Object.entries(P).map(([n,p])=>{const [t,s]=f(p);return [n,t?s/t*100:null,t,s];})
       .filter(r=>r[1]!=null).sort((a,b)=>b[1]-a[1] || b[2]-a[2]);
