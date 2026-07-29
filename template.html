@@ -167,6 +167,37 @@ main{max-width:1180px;margin:0 auto;padding:26px 20px 80px}
 .cbar.top .track i{background:linear-gradient(90deg,#22b573,var(--good))}
 .cbar .cval{font-family:var(--disp);font-weight:700;font-size:16px;text-align:right}
 .cbar .cval small{color:var(--mut);font-weight:500;font-size:12px;margin-left:5px}
+
+/* radar comparison */
+.radar-wrap{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px 24px}
+.radar-players{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px}
+.rp-btn{display:flex;align-items:center;gap:9px;background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:6px 12px 6px 6px;cursor:pointer;transition:border-color .15s,background .15s}
+.rp-btn:hover{background:#132444}
+.rp-btn.on{background:#132a52}
+.rp-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-weight:700;font-size:12px;flex:none}
+.rp-meta{display:flex;flex-direction:column;line-height:1.15;text-align:left}
+.rp-name{font-size:13.5px;font-weight:600;color:var(--ink)}
+.rp-sub{font-size:11px;color:var(--mut);letter-spacing:.03em}
+.rp-hint{color:var(--mut);font-size:12px;margin:2px 0 16px}
+.radar-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.radar-card{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:16px 14px 14px}
+.radar-card .rc-title{font-family:var(--disp);font-weight:600;font-size:13.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--mut);text-align:center;margin-bottom:6px}
+.radar-card svg{display:block;width:100%;height:auto}
+.radar-empty{display:flex;align-items:center;justify-content:center;min-height:300px;color:var(--mut);font-size:14px;text-align:center;padding:0 20px}
+.radar-legend{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-top:14px}
+.radar-legend .lg-item{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--ink)}
+.radar-legend .lg-swatch{width:12px;height:12px;border-radius:3px;flex:none}
+.axis-toggle{margin-top:14px}
+.axis-toggle summary{cursor:pointer;color:var(--mut);font-size:12.5px;letter-spacing:.05em;list-style:none;user-select:none}
+.axis-toggle summary::-webkit-details-marker{display:none}
+.axis-toggle summary::before{content:'▸ ';font-size:10px}
+.axis-toggle[open] summary::before{content:'▾ '}
+.axis-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:12px}
+.axis-col .ac-h{font-family:var(--disp);font-weight:600;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-bottom:8px}
+.axis-chips{display:flex;flex-wrap:wrap;gap:6px}
+.ax-chip{font-size:12px;background:var(--panel);border:1px solid var(--line);color:var(--mut);padding:5px 10px;border-radius:8px;cursor:pointer;transition:all .12s}
+.ax-chip:hover{border-color:var(--blue-deep)}
+.ax-chip.on{background:var(--blue-deep);border-color:var(--blue-deep);color:#fff}
 footer{border-top:1px solid var(--line);color:var(--mut);text-align:center;padding:22px;font-size:12.5px;letter-spacing:.05em}
 
 /* period toggle (reuses .mode look) */
@@ -231,7 +262,38 @@ footer{border-top:1px solid var(--line);color:var(--mut);text-align:center;paddi
   </div>
   <div class="page" id="page-compare">
     <div class="section" style="margin-top:0">
-      <div class="sec-title">Player Comparison</div>
+      <div class="sec-title">Radar Comparison <em id="radarScope"></em></div>
+      <div class="radar-wrap">
+        <div class="rp-hint">Pick up to 5 players to overlay · all values are per-game averages</div>
+        <div class="radar-players" id="radarPlayers"></div>
+        <div class="radar-grid">
+          <div class="radar-card">
+            <div class="rc-title">Per-Game Averages</div>
+            <div id="radarCount"></div>
+          </div>
+          <div class="radar-card">
+            <div class="rc-title">Percentages</div>
+            <div id="radarPct"></div>
+          </div>
+        </div>
+        <div class="radar-legend" id="radarLegend"></div>
+        <details class="axis-toggle">
+          <summary>Customise axes</summary>
+          <div class="axis-cols">
+            <div class="axis-col">
+              <div class="ac-h">Per-Game Average axes</div>
+              <div class="axis-chips" id="axisCount"></div>
+            </div>
+            <div class="axis-col">
+              <div class="ac-h">Percentage axes</div>
+              <div class="axis-chips" id="axisPct"></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+    <div class="section">
+      <div class="sec-title">Metric Ranking</div>
       <div class="cbar-wrap">
         <div class="controls">
           <div class="mode" id="modeBtns">
@@ -857,8 +919,180 @@ function initCompare(){
     document.querySelectorAll('#modeBtns button').forEach(x=>x.classList.toggle('on',x===b));
     fill(); renderCompare();
   }));
+  initRadar();
 }
+/* ---------- RADAR ---------- */
+const RADAR_COUNT = [
+  ["Goals",          p=>p.goals],
+  ["Shots",          p=>p.shots[0]],
+  ["Key Passes",     p=>p.keyPass],
+  ["Total Passes",   p=>p.passes.Total[0]],
+  ["Fwd Passes",     p=>p.passes.Forward[0]],
+  ["Passes Rec.",    p=>p.received],
+  ["Crosses",        p=>p.passes.Cross[0]],
+  ["1v1 Attacks",    p=>p.a1v1[0]],
+  ["Touches in Box", p=>p.touchBox],
+  ["Tackles Won",    p=>p.tackles[1]],
+  ["Interceptions",  p=>p.interception],
+  ["Recoveries",     p=>p.recovery],
+  ["Aerial Duels",   p=>p.aerial[0]],
+  ["Def. Duels",     p=>p.defDuel[0]],
+  ["Turnovers Won",  p=>p.turnoverWon],
+];
+const RADAR_PCT = [
+  ["Pass %",       p=>p.passes.Total],
+  ["Fwd Pass %",   p=>p.passes.Forward],
+  ["Long Pass %",  p=>p.passes.Long],
+  ["Cross %",      p=>p.passes.Cross],
+  ["On Target %",  p=>[p.shots[0], p.shots[1]]],
+  ["1v1 Atk %",    p=>p.a1v1],
+  ["Tackle %",     p=>p.tackles],
+  ["Aerial %",     p=>p.aerial],
+  ["Def. Duel %",  p=>p.defDuel],
+  ["2nd Ball %",   p=>p.second],
+];
+const RADAR_COUNT_DEFAULT = ["Goals","Shots","Key Passes","Total Passes","Passes Rec.","Tackles Won","Recoveries","Aerial Duels"];
+const RADAR_PCT_DEFAULT   = ["Pass %","Fwd Pass %","On Target %","Tackle %","Aerial %"];
+const RADAR_COLORS = ['#3d8bff','#39d98a','#ffb020','#c07cff','#ff4d5e'];
+
+let radarSel = [];   // selected player names (max 5)
+let axCount = RADAR_COUNT_DEFAULT.slice();
+let axPct   = RADAR_PCT_DEFAULT.slice();
+
+const safe = (fn,p)=>{ try{ const v=fn(p); return v; }catch(e){ return 0; } };
+
+/* per-game-average player data for the current scope, by name */
+function radarData(){
+  if(sel===-1) return Object.fromEntries(Object.entries(AGG).map(([n,a])=>[n,a.avg]));
+  return M[sel].players;
+}
+function radarApps(n){ return sel===-1 ? (AGG[n]?.apps||0) : 1; }
+function radarPos(n){ const d=radarData()[n]; return d && d.position ? d.position : ''; }
+
+function radarSVG(names, inds, data, {pctMode=false}={}){
+  const n = inds.length;
+  if(n < 3 || names.length === 0)
+    return `<div class="radar-empty">Select at least one player, and keep 3+ axes, to draw the radar.</div>`;
+
+  const size=340, cx=size/2, cy=size/2, R=118;
+  const ang = i => (Math.PI*2*i/n) - Math.PI/2;
+  const pt  = (i,r)=>[cx + r*Math.cos(ang(i)), cy + r*Math.sin(ang(i))];
+
+  // per-axis max: percentages fixed at 100; counts scaled to the squad's best on that axis
+  const scoped = Object.values(data);
+  const maxes = inds.map(([,f])=>{
+    if(pctMode) return 100;
+    let mx = 0;
+    for(const p of scoped){ const v = safe(f,p); if(typeof v==='number' && v>mx) mx=v; }
+    return mx>0 ? mx : 1;
+  });
+  const valOf = (p,[,f],i)=>{
+    if(pctMode){ const r=safe(f,p); const t=r&&r[0], s=r&&r[1]; return t? (s/t*100) : 0; }
+    const v = safe(f,p); return typeof v==='number'? v : 0;
+  };
+
+  let svg = `<svg viewBox="0 0 ${size} ${size}" role="img" aria-label="Player comparison radar">`;
+  // rings
+  [0.25,0.5,0.75,1].forEach(fr=>{
+    const pts = Array.from({length:n},(_,i)=>pt(i,R*fr)).map(p=>p.map(x=>x.toFixed(1)).join(',')).join(' ');
+    svg += `<polygon points="${pts}" fill="none" stroke="var(--line)" stroke-width="1" opacity="${fr===1?0.9:0.45}"/>`;
+  });
+  // spokes + labels
+  inds.forEach(([label],i)=>{
+    const [ex,ey]=pt(i,R);
+    svg += `<line x1="${cx}" y1="${cy}" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}" stroke="var(--line)" stroke-width="1" opacity="0.5"/>`;
+    const [lx,ly]=pt(i,R+20);
+    const anchor = Math.abs(lx-cx)<8 ? 'middle' : (lx>cx? 'start':'end');
+    svg += `<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="${anchor}" dominant-baseline="middle" font-size="10.5" fill="var(--mut)" font-family="var(--body)">${label}</text>`;
+  });
+  // player polygons
+  names.forEach((name)=>{
+    const p = data[name]; if(!p) return;
+    const ci = radarSel.indexOf(name);
+    const color = RADAR_COLORS[ci%RADAR_COLORS.length];
+    const pts = inds.map((ind,i)=>{
+      const frac = Math.max(0, Math.min(1, valOf(p,ind,i)/maxes[i]));
+      return pt(i, R*frac);
+    });
+    const d = pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ')+'Z';
+    svg += `<path d="${d}" fill="${color}" fill-opacity="0.13" stroke="${color}" stroke-width="2" stroke-linejoin="round"/>`;
+    pts.forEach(pp=> svg += `<circle cx="${pp[0].toFixed(1)}" cy="${pp[1].toFixed(1)}" r="2.6" fill="${color}"/>`);
+  });
+  svg += `</svg>`;
+  return svg;
+}
+
+function renderRadarPlayers(){
+  const data = radarData();
+  const box = document.getElementById('radarPlayers'); box.innerHTML='';
+  Object.keys(data).sort((a,b)=>a.localeCompare(b)).forEach(name=>{
+    const ci = radarSel.indexOf(name);
+    const on = ci>=0;
+    const color = on ? RADAR_COLORS[ci%RADAR_COLORS.length] : null;
+    const apps = radarApps(name), pos = radarPos(name);
+    const b = el(`<button class="rp-btn ${on?'on':''}" style="${color?`border-color:${color}`:''}">
+      <span class="rp-av" style="background:${(color||'#33456e')}22;color:${color||'var(--mut)'}">${initials(name)}</span>
+      <span class="rp-meta"><span class="rp-name">${name}</span>
+      <span class="rp-sub">${[pos, sel===-1?`${apps}g`:''].filter(Boolean).join(' · ')}</span></span>
+    </button>`);
+    b.addEventListener('click', ()=>{
+      const i = radarSel.indexOf(name);
+      if(i>=0) radarSel.splice(i,1);
+      else radarSel = radarSel.length<5 ? [...radarSel,name] : [...radarSel.slice(1),name];
+      renderRadar();
+    });
+    box.appendChild(b);
+  });
+}
+
+function renderAxisChips(){
+  const build = (elId, all, active, arrRef)=>{
+    const box = document.getElementById(elId); box.innerHTML='';
+    all.forEach(([label])=>{
+      const on = active.includes(label);
+      const c = el(`<button class="ax-chip ${on?'on':''}">${label}</button>`);
+      c.addEventListener('click', ()=>{
+        const arr = arrRef();
+        const i = arr.indexOf(label);
+        if(i>=0){ if(arr.length>3) arr.splice(i,1); }
+        else { if(arr.length<10) arr.push(label); }
+        renderRadar();
+      });
+      box.appendChild(c);
+    });
+  };
+  build('axisCount', RADAR_COUNT, axCount, ()=>axCount);
+  build('axisPct',   RADAR_PCT,   axPct,   ()=>axPct);
+}
+
+function renderRadar(){
+  const data = radarData();
+  radarSel = radarSel.filter(n=>data[n]);           // drop names not in current scope
+  document.getElementById('radarScope').textContent = sel===-1 ? 'Season averages' : matchLabel(M[sel]);
+
+  const countInds = RADAR_COUNT.filter(m=>axCount.includes(m[0]));
+  const pctInds   = RADAR_PCT.filter(m=>axPct.includes(m[0]));
+  document.getElementById('radarCount').innerHTML = radarSVG(radarSel, countInds, data, {pctMode:false});
+  document.getElementById('radarPct').innerHTML   = radarSVG(radarSel, pctInds,   data, {pctMode:true});
+
+  const lg = document.getElementById('radarLegend'); lg.innerHTML='';
+  radarSel.forEach((n,i)=> lg.appendChild(el(
+    `<span class="lg-item"><span class="lg-swatch" style="background:${RADAR_COLORS[i%RADAR_COLORS.length]}"></span>${n}</span>`)));
+
+  renderRadarPlayers();
+  renderAxisChips();
+}
+
+function initRadar(){
+  // preselect the 3 outfield players with the most season minutes (fallback: appearances)
+  const ranked = Object.entries(AGG)
+    .map(([n,a])=>[n, (a.tot && a.tot.mins) || 0, a.apps])
+    .sort((x,y)=> y[1]-x[1] || y[2]-x[2]);
+  radarSel = ranked.slice(0,3).map(r=>r[0]);
+}
+
 function renderCompare(){
+  renderRadar();
   const P = scopePlayers();
   const note = document.getElementById('scopeNote');
   note.textContent = sel===-1? `All matches — totals across ${M.length} match${M.length>1?'es':''}` : matchLabel(M[sel]);
