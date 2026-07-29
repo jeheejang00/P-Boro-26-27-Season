@@ -170,39 +170,42 @@ main{max-width:1180px;margin:0 auto;padding:26px 20px 80px}
 
 /* radar comparison */
 .radar-wrap{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px 24px}
-.radar-layout{display:grid;grid-template-columns:236px 1fr 236px;gap:20px;align-items:start}
-.radar-side{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:14px}
-.rs-h{font-family:var(--disp);font-weight:600;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-bottom:10px;display:flex;align-items:baseline;gap:6px}
-.rs-h .rs-hint{font-family:var(--body);text-transform:none;letter-spacing:0;font-size:11px;color:var(--mut);opacity:.75}
+.radar-layout{display:grid;grid-template-columns:180px 1fr 180px;gap:16px;align-items:start}
+.radar-side{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:12px}
+.rs-h{font-family:var(--disp);font-weight:600;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-bottom:9px;display:flex;align-items:baseline;gap:6px}
+.rs-h .rs-hint{font-family:var(--body);text-transform:none;letter-spacing:0;font-size:10.5px;color:var(--mut);opacity:.75}
 
-.radar-players{display:flex;flex-direction:column;gap:6px;max-height:560px;overflow:auto}
-.rp-btn{display:flex;align-items:center;gap:9px;width:100%;background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:7px 10px 7px 7px;cursor:pointer;transition:border-color .15s,background .15s;text-align:left}
+.radar-players{display:flex;flex-direction:column;gap:5px;max-height:640px;overflow:auto}
+.rp-btn{display:flex;flex:none;align-items:center;gap:7px;width:100%;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:6px 8px 6px 6px;cursor:pointer;transition:border-color .15s,background .15s;text-align:left}
 .rp-btn:hover{background:#132444}
 .rp-btn.on{background:#132a52}
-.rp-av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-weight:700;font-size:12px;flex:none}
+.rp-av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-weight:700;font-size:11px;flex:none}
 .rp-meta{display:flex;flex-direction:column;line-height:1.2;min-width:0;flex:1}
-.rp-name{font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rp-sub{font-size:10.5px;color:var(--mut);letter-spacing:.03em;display:flex;align-items:center;gap:5px}
-.rp-pos{font-family:var(--disp);font-weight:700;font-size:9.5px;letter-spacing:.06em;padding:0 5px;border-radius:4px;line-height:1.5}
-.rp-dot{width:10px;height:10px;border-radius:50%;flex:none;margin-left:2px}
+.rp-name{font-size:12px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rp-sub{font-size:10px;color:var(--mut);letter-spacing:.03em;display:flex;align-items:center;gap:4px}
+.rp-pos{font-family:var(--disp);font-weight:700;font-size:9px;letter-spacing:.05em;padding:0 4px;border-radius:4px;line-height:1.5}
+.rp-dot{width:9px;height:9px;border-radius:50%;flex:none;margin-left:2px}
 
-.radar-center{display:flex;flex-direction:column;gap:16px}
-.radar-card{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:16px 14px 14px}
-.radar-card .rc-title{font-family:var(--disp);font-weight:600;font-size:13.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--mut);text-align:center;margin-bottom:6px}
+.radar-center{display:flex;flex-direction:column;gap:14px}
+.radar-charts-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.radar-card{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:14px 10px 10px;min-width:0}
+.radar-card .rc-title{font-family:var(--disp);font-weight:600;font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);text-align:center;margin-bottom:4px}
 .radar-card svg{display:block;width:100%;height:auto}
-.radar-empty{display:flex;align-items:center;justify-content:center;min-height:300px;color:var(--mut);font-size:14px;text-align:center;padding:0 20px}
+.radar-empty{display:flex;align-items:center;justify-content:center;min-height:260px;color:var(--mut);font-size:13px;text-align:center;padding:0 14px}
 .radar-legend{display:flex;flex-wrap:wrap;gap:14px;justify-content:center}
 .radar-legend .lg-item{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--ink)}
 .radar-legend .lg-swatch{width:12px;height:12px;border-radius:3px;flex:none}
 
-.axis-chips{display:flex;flex-wrap:wrap;gap:6px}
-.ax-chip{font-size:12px;background:var(--panel);border:1px solid var(--line);color:var(--mut);padding:5px 10px;border-radius:8px;cursor:pointer;transition:all .12s}
+.axis-list{display:flex;flex-direction:column;gap:5px;max-height:270px;overflow:auto}
+.ax-chip{display:block;width:100%;flex:none;text-align:left;font-size:11.5px;line-height:1.5;background:var(--panel);border:1px solid var(--line);color:var(--mut);padding:6px 9px;border-radius:8px;cursor:pointer;transition:all .12s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;-webkit-appearance:none;appearance:none;font-family:var(--body)}
 .ax-chip:hover{border-color:var(--blue-deep)}
 .ax-chip.on{background:var(--blue-deep);border-color:var(--blue-deep);color:#fff}
 
 @media (max-width:960px){
   .radar-layout{grid-template-columns:1fr}
   .radar-players{max-height:260px}
+  .radar-charts-row{grid-template-columns:1fr}
+  .axis-list{max-height:200px}
 }
 footer{border-top:1px solid var(--line);color:var(--mut);text-align:center;padding:22px;font-size:12.5px;letter-spacing:.05em}
 
@@ -292,22 +295,24 @@ footer{border-top:1px solid var(--line);color:var(--mut);text-align:center;paddi
           </div>
 
           <div class="radar-center">
-            <div class="radar-card">
-              <div class="rc-title">Per-Game Averages</div>
-              <div id="radarCount"></div>
-            </div>
-            <div class="radar-card">
-              <div class="rc-title">Percentages</div>
-              <div id="radarPct"></div>
+            <div class="radar-charts-row">
+              <div class="radar-card">
+                <div class="rc-title">Per-Game Averages</div>
+                <div id="radarCount"></div>
+              </div>
+              <div class="radar-card">
+                <div class="rc-title">Percentages</div>
+                <div id="radarPct"></div>
+              </div>
             </div>
             <div class="radar-legend" id="radarLegend"></div>
           </div>
 
           <div class="radar-side radar-side-axes">
             <div class="rs-h">Per-Game Indicators</div>
-            <div class="axis-chips" id="axisCount"></div>
-            <div class="rs-h" style="margin-top:18px">Percentage Indicators</div>
-            <div class="axis-chips" id="axisPct"></div>
+            <div class="axis-list" id="axisCount"></div>
+            <div class="rs-h" style="margin-top:16px">Percentage Indicators</div>
+            <div class="axis-list" id="axisPct"></div>
           </div>
 
         </div>
@@ -984,7 +989,7 @@ function radarSVG(names, inds, data, {pctMode=false}={}){
   if(n < 3 || names.length === 0)
     return `<div class="radar-empty">Select at least one player, and keep 3+ axes, to draw the radar.</div>`;
 
-  const size=340, cx=size/2, cy=size/2, R=118;
+  const size=310, cx=size/2, cy=size/2, R=100;
   const ang = i => (Math.PI*2*i/n) - Math.PI/2;
   const pt  = (i,r)=>[cx + r*Math.cos(ang(i)), cy + r*Math.sin(ang(i))];
 
@@ -1011,7 +1016,7 @@ function radarSVG(names, inds, data, {pctMode=false}={}){
   inds.forEach(([label],i)=>{
     const [ex,ey]=pt(i,R);
     svg += `<line x1="${cx}" y1="${cy}" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}" stroke="var(--line)" stroke-width="1" opacity="0.5"/>`;
-    const [lx,ly]=pt(i,R+20);
+    const [lx,ly]=pt(i,R+17);
     const anchor = Math.abs(lx-cx)<8 ? 'middle' : (lx>cx? 'start':'end');
     svg += `<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="${anchor}" dominant-baseline="middle" font-size="10.5" fill="var(--mut)" font-family="var(--body)">${label}</text>`;
   });
