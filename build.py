@@ -114,13 +114,23 @@ def clean_opponent(raw):
     m = re.search(r"vs\.?\s+(.+?)(?:\s+\d{1,2}[\.\/]\d{1,2}[\.\/]\d{2,4})?\s*$", s, re.IGNORECASE)
     return m.group(1).strip() if m else s
 
+def parse_team(fname):
+    """U15 files are named with a 'U15_' (or 'U15-') prefix, e.g.
+    'U15_260718_vs_Wolves.xlsx'. Anything without that prefix is U16 —
+    this keeps every existing match file working unchanged."""
+    return "U15" if re.match(r"^u15[_\-\s]", fname, re.IGNORECASE) else "U16"
+
 def parse_meta(path, df, fname):
+    team = parse_team(fname)
+    # strip a leading 'U15_' before date-parsing, so the filename's YYMMDD
+    # date convention still matches regardless of the team prefix
+    fname_dated = re.sub(r"^u15[_\-\s]", "", fname, flags=re.IGNORECASE)
     extra = load_match_meta(path)
     # date: prefer the filename's leading YYMMDD (the analyst's consistent
     # naming convention across weeks) over Timeline text or Dashboard's DATE
     # cell, both of which have been inconsistently formatted/blank.
     date_iso, date_label = "", ""
-    fm = re.match(r"(\d{2})(\d{2})(\d{2})", fname)
+    fm = re.match(r"(\d{2})(\d{2})(\d{2})", fname_dated)
     if fm:
         yy, mm, dd = fm.groups()
         date_iso = f"20{yy}-{mm}-{dd}"
@@ -136,13 +146,13 @@ def parse_meta(path, df, fname):
 
     if extra.get("opponent") and extra.get("venue"):
         return {"opponent": clean_opponent(extra["opponent"]), "venue": extra["venue"],
-                "dateLabel": date_label, "date": date_iso, "file": fname}
+                "dateLabel": date_label, "date": date_iso, "file": fname, "team": team}
     # full fallback: parse opponent/venue from the Timeline string (older
     # files without the Dashboard Opposition/Venue table)
     tl = str(df["Timeline"].dropna().iloc[0])
     m = re.search(r"vs\s+(.+?)\s*\((H|A)\)\s*([\d.]+)", tl)
     opp, venue = (m.group(1), m.group(2)) if m else (tl, "?")
-    return {"opponent": opp, "venue": venue, "dateLabel": date_label, "date": date_iso, "file": fname}
+    return {"opponent": opp, "venue": venue, "dateLabel": date_label, "date": date_iso, "file": fname, "team": team}
 
 def chance_block(series):
     s = series.fillna("")
