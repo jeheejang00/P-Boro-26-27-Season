@@ -115,22 +115,22 @@ def clean_opponent(raw):
     return m.group(1).strip() if m else s
 
 def parse_team(fname):
-    """U15 files are named with a 'U15_' (or 'U15-') prefix, e.g.
-    'U15_260718_vs_Wolves.xlsx'. Anything without that prefix is U16 —
-    this keeps every existing match file working unchanged."""
-    return "U15" if re.match(r"^u15[_\-\s]", fname, re.IGNORECASE) else "U16"
+    """U15 files carry a '15s' token in the filename (the analyst's
+    actual convention), e.g. '260729_15s_vs_Onside_Academy.xlsx'. A 'U15'
+    prefix is also recognized. Anything else defaults to U16 — every
+    existing match file keeps working unchanged."""
+    if re.search(r"(?:^|[_\-\s])(u15|15s)(?:$|[_\-\s])", fname, re.IGNORECASE):
+        return "U15"
+    return "U16"
 
 def parse_meta(path, df, fname):
     team = parse_team(fname)
-    # strip a leading 'U15_' before date-parsing, so the filename's YYMMDD
-    # date convention still matches regardless of the team prefix
-    fname_dated = re.sub(r"^u15[_\-\s]", "", fname, flags=re.IGNORECASE)
     extra = load_match_meta(path)
     # date: prefer the filename's leading YYMMDD (the analyst's consistent
     # naming convention across weeks) over Timeline text or Dashboard's DATE
     # cell, both of which have been inconsistently formatted/blank.
     date_iso, date_label = "", ""
-    fm = re.match(r"(\d{2})(\d{2})(\d{2})", fname_dated)
+    fm = re.match(r"(\d{2})(\d{2})(\d{2})", fname)
     if fm:
         yy, mm, dd = fm.groups()
         date_iso = f"20{yy}-{mm}-{dd}"

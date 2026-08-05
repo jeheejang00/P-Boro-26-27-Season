@@ -440,6 +440,7 @@ function populateMatchSel(){
   document.getElementById('tab-'+p).addEventListener('click', ()=>{
     document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on', b.id==='tab-'+p));
     document.querySelectorAll('.page').forEach(pg=>pg.classList.toggle('on', pg.id==='page-'+p));
+    document.getElementById('teamToggle').style.display = p==='team' ? 'flex' : 'none';
     window.scrollTo({top:0});
   });
 });
