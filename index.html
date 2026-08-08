@@ -170,12 +170,12 @@ main{max-width:1180px;margin:0 auto;padding:26px 20px 80px}
 
 /* radar comparison */
 .radar-wrap{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px 24px}
-.radar-layout{display:grid;grid-template-columns:180px 1fr 180px;gap:16px;align-items:start}
-.radar-side{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:12px}
+.radar-layout{display:grid;grid-template-columns:180px 1fr 160px;gap:16px;align-items:stretch}
+.radar-side{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column}
 .rs-h{font-family:var(--disp);font-weight:600;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-bottom:9px;display:flex;align-items:baseline;gap:6px}
 .rs-h .rs-hint{font-family:var(--body);text-transform:none;letter-spacing:0;font-size:10.5px;color:var(--mut);opacity:.75}
 
-.radar-players{display:flex;flex-direction:column;gap:5px;max-height:640px;overflow:auto}
+.radar-players{display:flex;flex-direction:column;gap:5px;flex:1 1 0;min-height:0;overflow:auto}
 .rp-btn{display:flex;flex:none;align-items:center;gap:7px;width:100%;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:6px 8px 6px 6px;cursor:pointer;transition:border-color .15s,background .15s;text-align:left}
 .rp-btn:hover{background:#132444}
 .rp-btn.on{background:#132a52}
@@ -196,16 +196,17 @@ main{max-width:1180px;margin:0 auto;padding:26px 20px 80px}
 .radar-legend .lg-item{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--ink)}
 .radar-legend .lg-swatch{width:12px;height:12px;border-radius:3px;flex:none}
 
-.axis-list{display:flex;flex-direction:column;gap:5px;max-height:270px;overflow:auto}
+.axis-list{display:flex;flex-direction:column;gap:5px;flex:1 1 0;min-height:0;overflow:auto}
 .ax-chip{display:block;width:100%;flex:none;text-align:left;font-size:11.5px;line-height:1.5;background:var(--panel);border:1px solid var(--line);color:var(--mut);padding:6px 9px;border-radius:8px;cursor:pointer;transition:all .12s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;-webkit-appearance:none;appearance:none;font-family:var(--body)}
 .ax-chip:hover{border-color:var(--blue-deep)}
 .ax-chip.on{background:var(--blue-deep);border-color:var(--blue-deep);color:#fff}
 
 @media (max-width:960px){
   .radar-layout{grid-template-columns:1fr}
-  .radar-players{max-height:260px}
+  .radar-side{display:block}
+  .radar-players{flex:none;max-height:260px}
   .radar-charts-row{grid-template-columns:1fr}
-  .axis-list{max-height:200px}
+  .axis-list{flex:none;max-height:200px}
 }
 footer{border-top:1px solid var(--line);color:var(--mut);text-align:center;padding:22px;font-size:12.5px;letter-spacing:.05em}
 
@@ -925,8 +926,8 @@ function renderPlayerCard(){
         <div class="psub num">${a.apps} appearance${a.apps>1?'s':''}${a.tot.mins!=null? ' · '+a.tot.mins+' mins total':''}${a.tot.position? ' · '+(POS_FULL[a.tot.position]||a.tot.position):''}</div></div>
       ${positionKPIs(a.tot)}</div>`;
     box.innerHTML = `<div class="pcard">${head}
-      <div class="block-h avg">Per Match Average</div>${statBlocks(a.avg)}
       <div class="block-h tot">Totals — ${a.apps} match${a.apps>1?'es':''}</div>${statBlocks(a.tot)}
+      <div class="block-h avg">Per Match Average</div>${statBlocks(a.avg)}
     </div>`;
   } else {
     const p = M[sel].players[n];
